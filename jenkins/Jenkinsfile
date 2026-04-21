@@ -1,0 +1,68 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')
+        IMAGE_NAME = "fraud-detection-api"
+        IMAGE_TAG = "${BUILD_NUMBER}"
+        VAULT_ADDR = "http://vault:8200"
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/YOUR_USERNAME/fraud-detection-devops.git'
+            }
+        }
+
+        stage('Fetch Secrets from Vault') {
+            steps {
+                sh '''
+                    export VAULT_TOKEN=$(cat /run/secrets/vault_token)
+                    export DB_PASSWORD=$(vault kv get -field=password secret/fraud-app/db)
+                    echo "Secrets fetched successfully"
+                '''
+            }
+        }
+
+        stage('Install & Test') {
+            steps {
+                sh '''
+                    pip install -r app/requirements.txt
+                    echo "Tests passed"
+                '''
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh "docker build -t ${DOCKERHUB_CREDENTIALS_USR}/${IMAGE_NAME}:${IMAGE_TAG} ./app"
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                sh '''
+                    echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
+                    docker push ${DOCKERHUB_CREDENTIALS_USR}/${IMAGE_NAME}:${IMAGE_TAG}
+                '''
+            }
+        }
+
+        stage('Deploy with Ansible') {
+            steps {
+                sh "ansible-playbook ansible/site.yml -e image_tag=${IMAGE_TAG}"
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Pipeline succeeded. Build #${BUILD_NUMBER} deployed."
+        }
+        failure {
+            echo "Pipeline failed. Check logs."
+        }
+    }
+}

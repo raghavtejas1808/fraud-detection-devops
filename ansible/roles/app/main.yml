@@ -1,0 +1,19 @@
+---
+- name: Pull latest fraud-api Docker image
+  docker_image:
+    name: "{{ dockerhub_user }}/fraud-detection-api:{{ image_tag }}"
+    source: pull
+
+- name: Stop existing container
+  docker_container:
+    name: fraud-api
+    state: absent
+
+- name: Start fraud-api container
+  docker_container:
+    name: fraud-api
+    image: "{{ dockerhub_user }}/fraud-detection-api:{{ image_tag }}"
+    state: started
+    restart_policy: always
+    ports:
+      - "8000:8000"

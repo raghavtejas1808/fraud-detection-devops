@@ -1,0 +1,12 @@
+---
+- name: Deploy Fraud Detection Pipeline
+  hosts: all
+  become: yes
+
+  vars:
+    image_tag: "latest"
+
+  roles:
+    - app
+    - monitoring
+    - k8s

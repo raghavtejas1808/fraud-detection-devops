@@ -1,0 +1,15 @@
+---
+- name: Apply Kubernetes deployment
+  k8s:
+    state: present
+    src: /opt/k8s/deployment.yaml
+
+- name: Apply Kubernetes service
+  k8s:
+    state: present
+    src: /opt/k8s/service.yaml
+
+- name: Apply Horizontal Pod Autoscaler
+  k8s:
+    state: present
+    src: /opt/k8s/hpa.yaml
