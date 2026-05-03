@@ -6,6 +6,11 @@ metadata:
     app: fraud-api
 spec:
   replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: fraud-api
@@ -16,9 +21,21 @@ spec:
     spec:
       containers:
         - name: fraud-api
-          image: YOUR_DOCKERHUB_USERNAME/fraud-detection-api:latest
+          image: atulspatil/fraud-detection-api:latest
           ports:
             - containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 10
           resources:
             requests:
               cpu: "100m"

@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    triggers {
+        githubPush()
+    }
+
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')
         IMAGE_NAME = "fraud-detection-api"
@@ -12,7 +16,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/YOUR_USERNAME/fraud-detection-devops.git'
+                git branch: 'main', url: "https://github.com/${DOCKERHUB_CREDENTIALS_USR}/fraud-detection-devops.git"
             }
         }
 
@@ -26,12 +30,15 @@ pipeline {
             }
         }
 
-        stage('Install & Test') {
+        stage('Install Dependencies') {
             steps {
-                sh '''
-                    pip install -r app/requirements.txt
-                    echo "Tests passed"
-                '''
+                sh 'pip install -r app/requirements.txt'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh 'cd app && python -m pytest test_main.py -v --tb=short'
             }
         }
 
@@ -52,7 +59,7 @@ pipeline {
 
         stage('Deploy with Ansible') {
             steps {
-                sh "ansible-playbook ansible/site.yml -e image_tag=${IMAGE_TAG}"
+                sh "ansible-playbook -i ansible/inventory.ini ansible/site.yml -e image_tag=${IMAGE_TAG} -e dockerhub_user=${DOCKERHUB_CREDENTIALS_USR}"
             }
         }
     }

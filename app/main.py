@@ -1,18 +1,29 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import joblib
+import json
 import numpy as np
 import logging
 import datetime
+import os
 
-logging.basicConfig(
-    filename="app.log",
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(message)s"
-)
+LOG_FILE = os.getenv("LOG_FILE", "app.log")
+
+logger = logging.getLogger("fraud_api")
+logger.setLevel(logging.INFO)
+
+file_handler = logging.FileHandler(LOG_FILE)
+file_handler.setFormatter(logging.Formatter("%(message)s"))
+logger.addHandler(file_handler)
+
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(logging.Formatter("%(message)s"))
+logger.addHandler(stream_handler)
 
 app = FastAPI(title="Fraud Detection API")
-model = joblib.load("fraud_model.pkl")
+
+MODEL_PATH = os.getenv("MODEL_PATH", "fraud_model.pkl")
+model = joblib.load(MODEL_PATH)
 
 class Transaction(BaseModel):
     amount: float
@@ -39,8 +50,8 @@ def predict(txn: Transaction):
     prediction = int(model.predict(features)[0])
     is_fraud = prediction == -1
 
-    logging.info({
-        "timestamp": str(datetime.datetime.now()),
+    log_entry = {
+        "timestamp": datetime.datetime.now().isoformat(),
         "amount": txn.amount,
         "merchant_category": txn.merchant_category,
         "hour_of_day": txn.hour_of_day,
@@ -48,7 +59,8 @@ def predict(txn: Transaction):
         "is_foreign_transaction": txn.is_foreign_transaction,
         "fraud_score": round(score, 4),
         "is_fraud": is_fraud
-    })
+    }
+    logger.info(json.dumps(log_entry))
 
     return {
         "is_fraud": is_fraud,

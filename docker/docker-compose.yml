@@ -3,16 +3,19 @@ version: '3.8'
 services:
 
   fraud-api:
-    build: ./app
+    build:
+      context: ../app
+      dockerfile: Dockerfile
     container_name: fraud-api
     ports:
       - "8000:8000"
     volumes:
-      - ./app:/app
+      - app_logs:/app/logs
     depends_on:
       - elasticsearch
     environment:
-      - ENV=development
+      - ENV=production
+      - LOG_FILE=/app/logs/app.log
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
@@ -31,9 +34,11 @@ services:
     ports:
       - "5044:5044"
     volumes:
-      - ./elk/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ../elk/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - app_logs:/app/logs:ro
     depends_on:
       - elasticsearch
+      - fraud-api
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.12.0
@@ -58,3 +63,4 @@ services:
 
 volumes:
   es_data:
+  app_logs:
