@@ -39,7 +39,10 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'pip install --break-system-packages -r app/requirements.txt ansible'
+                sh '''
+                    apt-get update && apt-get install -y python3-pip python3-venv
+                    pip install --break-system-packages -r app/requirements.txt ansible
+                '''
             }
         }
 
@@ -51,7 +54,7 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                sh 'cd app && python -m pytest test_main.py -v --tb=short'
+                sh 'cd app && python3 -m pytest test_main.py -v --tb=short'
             }
         }
 
