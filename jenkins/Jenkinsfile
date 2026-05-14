@@ -51,7 +51,7 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                sh 'cd app && python -m pytest test_main.py -v --tb=short'
+                sh 'cd app && python3 -m pytest test_main.py -v --tb=short'
             }
         }
 
