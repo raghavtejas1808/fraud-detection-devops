@@ -65,6 +65,12 @@ python simulate.py
 
 # 6. View Kibana dashboard
 open http://localhost:5601
+
+# 7. Scrape Prometheus Metrics
+curl http://localhost:8000/metrics
+
+# 8. Trigger Dynamic Retraining On-Demand
+curl -X POST http://localhost:8000/retrain
 ```
 
 ## Vault Setup

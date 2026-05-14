@@ -6,6 +6,7 @@ API_URL = "http://localhost:8000/predict"
 
 CATEGORIES = ["grocery", "online_retail", "gas", "entertainment", "travel", "other"]
 
+
 def generate_transaction():
     is_fraud_sim = random.random() < 0.1  # 10% fraud rate in simulation
 
@@ -26,6 +27,7 @@ def generate_transaction():
             "is_foreign_transaction": 0
         }
 
+
 if __name__ == "__main__":
     print("Starting transaction simulation... Press Ctrl+C to stop.")
     while True:
@@ -34,7 +36,8 @@ if __name__ == "__main__":
             response = requests.post(API_URL, json=txn)
             result = response.json()
             status = "FRAUD" if result["is_fraud"] else "OK"
-            print(f"[{status}] Amount: {txn['amount']} | Category: {txn['merchant_category']} | Score: {result['fraud_score']}")
+            print(f"[{status}] Amount: {txn['amount']} | "
+                  f"Category: {txn['merchant_category']} | Score: {result['fraud_score']}")
         except Exception as e:
             print(f"Error: {e}")
         time.sleep(1)

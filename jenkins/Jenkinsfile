@@ -10,6 +10,7 @@ pipeline {
         IMAGE_NAME = "fraud-detection-api"
         IMAGE_TAG = "${BUILD_NUMBER}"
         VAULT_ADDR = "http://vault:8200"
+        EMAIL_TO = "sraghavtejas1808@gmail.com"
     }
 
     stages {
@@ -33,6 +34,12 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 sh 'pip install -r app/requirements.txt'
+            }
+        }
+
+        stage('Lint Code') {
+            steps {
+                sh 'flake8 app/ --max-line-length=120'
             }
         }
 
@@ -67,9 +74,15 @@ pipeline {
     post {
         success {
             echo "Pipeline succeeded. Build #${BUILD_NUMBER} deployed."
+            mail to: "${EMAIL_TO}",
+                 subject: "SUCCESS: Jenkins Build #${BUILD_NUMBER} - fraud-detection-devops",
+                 body: "Great news! Build #${BUILD_NUMBER} of fraud-detection-devops completed successfully and deployed.\n\nCheck console output at: ${BUILD_URL}"
         }
         failure {
             echo "Pipeline failed. Check logs."
+            mail to: "${EMAIL_TO}",
+                 subject: "FAILURE: Jenkins Build #${BUILD_NUMBER} - fraud-detection-devops",
+                 body: "Warning! Build #${BUILD_NUMBER} of fraud-detection-devops failed during execution.\n\nCheck console output at: ${BUILD_URL}"
         }
     }
 }
