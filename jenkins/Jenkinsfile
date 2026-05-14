@@ -10,7 +10,7 @@ pipeline {
         IMAGE_NAME = "fraud_detection_devops"
         IMAGE_TAG = "${BUILD_NUMBER}"
         VAULT_ADDR = "http://vault:8200"
-        EMAIL_TO = "sraghavtejas1808@gmail.com"
+        EMAIL_TO = "atul9soni@gmail.com,sraghavtejas1808@gmail.com"
     }
 
     stages {
