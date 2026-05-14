@@ -39,7 +39,10 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'pip3 install --break-system-packages -r app/requirements.txt ansible'
+                sh '''
+                    apt-get update && apt-get install -y python3-pip python3-venv
+                    pip install --break-system-packages -r app/requirements.txt ansible
+                '''
             }
         }
 
