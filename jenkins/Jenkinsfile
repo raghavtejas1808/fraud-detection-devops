@@ -39,7 +39,7 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'pip install --break-system-packages -r app/requirements.txt ansible'
+                sh 'pip3 install --break-system-packages -r app/requirements.txt ansible'
             }
         }
 
