@@ -48,7 +48,7 @@ pipeline {
 
         stage('Lint Code') {
             steps {
-                sh 'flake8 app/ --max-line-length=120'
+                sh 'python3 -m flake8 app/ --max-line-length=120'
             }
         }
 
